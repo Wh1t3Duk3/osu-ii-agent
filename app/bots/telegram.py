@@ -4,6 +4,7 @@ from aiogram import Bot, Dispatcher, F
 from aiogram.filters import CommandStart, Command
 from aiogram.types import Message
 from aiogram.enums import ParseMode, ChatAction
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 from aiohttp import web
 
@@ -57,7 +58,19 @@ async def handle_message(message: Message) -> None:
     logger.info(f"🤖 Telegram | user_id={message.from_user.id}: {response[:200]}")
 
     for chunk in _split_message(response):
-        await message.answer(chunk, parse_mode=ParseMode.MARKDOWN)
+        await _safe_send(message, chunk)
+
+
+async def _safe_send(message: Message, text: str) -> None:
+    """Отправляет сообщение с Markdown, при ошибке парсинга — plain text."""
+    try:
+        await message.answer(text, parse_mode=ParseMode.MARKDOWN)
+    except TelegramBadRequest as e:
+        if "parse entities" in str(e).lower() or "can't find end" in str(e).lower():
+            logger.warning(f"⚠️ Markdown не распознан, отправляю plain text: {e}")
+            await message.answer(text)
+        else:
+            raise
 
 
 def _split_message(text: str, limit: int = 4000) -> list[str]:
