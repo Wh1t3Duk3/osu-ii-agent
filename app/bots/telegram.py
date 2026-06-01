@@ -79,13 +79,13 @@ def _split_message(text: str, limit: int = 4000) -> list[str]:
 
 
 async def start() -> None:
-    # webhook_url = f"{TELEGRAM_WEBHOOK_URL}{TELEGRAM_WEBHOOK_PATH}"
-    #
-    # await bot.set_webhook(
-    #     url=webhook_url,
-    #     drop_pending_updates=True,
-    # )
-    # logger.info(f"🔗 Telegram webhook зарегистрирован: {webhook_url}")
+    webhook_url = f"{TELEGRAM_WEBHOOK_URL}{TELEGRAM_WEBHOOK_PATH}"
+
+    await bot.set_webhook(
+        url=webhook_url,
+        drop_pending_updates=True,
+    )
+    logger.info(f"🔗 Telegram webhook зарегистрирован: {webhook_url}")
 
     app = web.Application()
     SimpleRequestHandler(dispatcher=dp, bot=bot).register(app, path=TELEGRAM_WEBHOOK_PATH)
