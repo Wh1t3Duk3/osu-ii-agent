@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[oc]
+*.pyo
+build/
+dist/
+wheels/
+*.egg-info/
+
+# Virtual environment
+.venv/
+
+# uv
+.python-version
+
+# Environment variables
+.env
+
+# Логи
+*.log
+
+# Gradio
+.gradio/
+
+# IDE
+.idea/
+.vscode/
+
+# Кеш страниц (SQLite)
+storage/db/*.db
+
+# Windows артефакты
+C:/

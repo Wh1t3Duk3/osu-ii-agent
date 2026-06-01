@@ -1,0 +1,10 @@
+services:
+  osu-agent:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "7860:7860"   # Gradio
+      - "8080:8080"   # Telegram webhook
+    env_file: .env
+    volumes:
+      - ./storage:/app/storage   # кеш и sitemap сохраняются между перезапусками
