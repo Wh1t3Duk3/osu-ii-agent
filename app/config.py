@@ -25,4 +25,4 @@ LOG_BACKUP_COUNT: int = 3
 
 GRADIO_HOST: str = "0.0.0.0"
 GRADIO_PORT: int = 7860
-GRADIO_ROOT_PATH: str = os.getenv("GRADIO_ROOT_PATH", "/agent")
+GRADIO_ROOT_PATH: str = os.getenv("GRADIO_ROOT_PATH", "")
