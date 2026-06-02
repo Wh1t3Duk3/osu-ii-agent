@@ -65,6 +65,19 @@ async def _fetch_binary(url: str) -> tuple[bytes, str]:
         return response.content, response.headers.get("content-type", "")
 
 
+_OSU_404_MARKER = "/doc/404"
+
+
+def _is_osu_404(final_url: str, html: str) -> bool:
+    """Определяет, является ли страница 404 на osu.ru."""
+    if _OSU_404_MARKER in str(final_url):
+        return True
+    # Дополнительная проверка по содержимому страницы
+    markers = ["страница не найдена", "page not found", "404"]
+    html_lower = html.lower()[:2000]
+    return any(m in html_lower for m in markers)
+
+
 async def _fetch_html(url: str) -> str | None:
     """Быстрый fetch через httpx + trafilatura для HTML-страниц."""
     try:
@@ -72,6 +85,11 @@ async def _fetch_html(url: str) -> str | None:
             response = await client.get(url)
             response.raise_for_status()
             html = response.text
+            final_url = str(response.url)
+
+        if _is_osu_404(final_url, html):
+            logger.warning(f"🚫 Страница не существует (редирект на 404): {url} → {final_url}")
+            return "PAGE_NOT_FOUND"
 
         return trafilatura.extract(
             html,
@@ -140,6 +158,10 @@ async def fetch_page(url: str) -> str:
     else:
         # HTML-путь: сначала быстрый, потом Playwright
         content = await _fetch_html(url)
+
+        # Страница не существует — сразу возвращаем, не кешируем
+        if content == "PAGE_NOT_FOUND":
+            return f"❌ Страница не найдена: {url}\nСсылка ведёт на страницу 404. Не используй этот URL в ответе пользователю."
 
         if not content:
             # Проверяем — может сервер отдал PDF несмотря на URL
